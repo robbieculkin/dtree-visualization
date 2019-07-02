@@ -28,13 +28,17 @@ def generate_elements(tree, feature_names):
     for node in range(node_count):
         #NODES
         if feature[node] == TREE_LEAF:
+            node_type = 'leaf'
             node_label = 'leaf'
         else:
+            node_type = 'nonleaf'
             node_label = str(feature_names[feature[node]])
+
         elements.append(
             {'data':
                 {'id': str(node),
                 'label': node_label,
+                'type': node_type
                 },
              'classes': 'center-center'
             }

@@ -5,7 +5,7 @@ stylesheet = [
       "content": "",
       "width": 25,
       "height": 25,
-      "background-color": "#4080e6",
+      "background-color": "#84b1fa",
       "background-blacken": 0,
       "background-opacity": 1,
       "shape": "circle",
@@ -37,6 +37,12 @@ stylesheet = [
       "text-valign": "center",
       "text-margin-x": 0,
       "text-margin-y": 0
+    }
+  },
+  {
+    "selector": 'node[type="leaf"]',
+    "style": {
+      "background-color": "#ff9999"
     }
   },
   {

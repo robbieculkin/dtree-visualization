@@ -2,7 +2,7 @@ import dash_cytoscape as cyto
 import dash_html_components as html
 from stylesheet import stylesheet
 
-def cyto_layout(elements):
+def cyto_layout(elements, n_classes):
     cyto.load_extra_layouts()
 
     return html.Div([
@@ -14,6 +14,6 @@ def cyto_layout(elements):
             },
             style={'width': 'auto', 'height': '100vh'},
             elements=elements,
-            stylesheet=stylesheet,
+            stylesheet=stylesheet(n_classes),
         )
     ])

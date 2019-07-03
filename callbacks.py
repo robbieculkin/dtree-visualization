@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 TREE_LEAF = -2
 
+
 def imdb_data():
     imdb = pd.read_csv('data/imdb_labelled.txt', sep='\t')
     imdb.columns = ['text', 'sentiment']
@@ -17,7 +18,10 @@ def imdb_data():
 
     return X, y, feature_names
 
-def generate_elements(tree, feature_names):
+# TODO make into callback to support collapsing, etc
+
+
+def generate_elements(tree, feature_names, class_names):
     node_count = tree.tree_.node_count
     children_left = tree.tree_.children_left
     children_right = tree.tree_.children_right
@@ -26,10 +30,11 @@ def generate_elements(tree, feature_names):
 
     elements = []
     for node in range(node_count):
-        #NODES
+        # NODES
+        node_class = np.argmax(tree.tree_.value[node])
         if feature[node] == TREE_LEAF:
-            node_type = 'leaf'
-            node_label = 'leaf'
+            node_type = f'leaf-{node_class}'
+            node_label = class_names[node_class]
         else:
             node_type = 'nonleaf'
             node_label = str(feature_names[feature[node]])
@@ -37,31 +42,31 @@ def generate_elements(tree, feature_names):
         elements.append(
             {'data':
                 {'id': str(node),
-                'label': node_label,
-                'type': node_type
-                },
+                 'label': node_label,
+                 'type': node_type
+                 },
              'classes': 'center-center'
-            }
+             }
         )
 
-        #EDGES
-        if children_left[node] != -1: #read: if node has a left child
+        # EDGES
+        if children_left[node] != -1:  # read: if node has a left child
             elements.append(
                 {'data':
                     {'source': node,
-                    'target': children_left[node],
-                    'label': 'No'
-                    }
-                }
+                     'target': children_left[node],
+                     'label': 'No'
+                     }
+                 }
             )
-        if children_right[node] != -1: #read: if node has a right child
+        if children_right[node] != -1:  # read: if node has a right child
             elements.append(
                 {'data':
                     {'source': node,
-                    'target': children_right[node],
-                    'label': 'Yes'
-                    }
-                }
+                     'target': children_right[node],
+                     'label': 'Yes'
+                     }
+                 }
             )
 
     return elements

@@ -1,18 +1,11 @@
 import dash
-from sklearn.tree import DecisionTreeClassifier
-from callbacks import generate_elements, imdb_data
+from callbacks import get_callbacks
 from layout import cyto_layout
 
 app = dash.Dash(__name__)
 
-X, y, feature_names = imdb_data()
-class_names = ['negative', 'positive']
-n_classes = 2
-tree = DecisionTreeClassifier(max_leaf_nodes=10, random_state=0)
-tree.fit(X, y)
-
-elements = generate_elements(tree, feature_names, class_names)
-app.layout = cyto_layout(elements, n_classes)
+app.layout = cyto_layout()
+get_callbacks(app)
 
 
 if __name__ == '__main__':

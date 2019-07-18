@@ -12,6 +12,7 @@ DEFAULT_MAX_DEPTH = 10
 DEPTH_ON_CLICK = 3
 SHADES = ['#F17F71', '#FBF4CB', '#75B78C', '#8F5866']
 
+#TODO known bug: collapsed nodes sometimes require 2 clicks to display childrens
 
 def generate_node_element(node_id, tree, names, collapsed_leaf=False):
     node_class = np.argmax(tree['value'][node_id])
@@ -84,18 +85,11 @@ def collapsed_leaves(tree, visible):
                 collapsed_leaf.append(node_id)
     return collapsed_leaf
 
-def get_callbacks(app):
-    @app.callback(Output('prepped-data', 'children'),
-                  [Input('dummy', 'children')])
-    def load_data(dummy):
-        data = pd.read_csv('data/imdb_labelled.txt', sep='\t')
-        data.columns = ['X', 'y']
-
-        return data.to_json()
+def get_callbacks(app, data_div):
 
     @app.callback([Output('tree', 'children'),
                    Output('names', 'children')],
-                  [Input('prepped-data', 'children')])
+                  [Input(data_div, 'children')])
     def fit_tree(data):
         data = pd.read_json(data)
 

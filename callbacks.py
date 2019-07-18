@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output, State
 ROOT_NODE = 0
 TREE_LEAF = -2
 DEFAULT_MAX_DEPTH = 10
+DEPTH_ON_CLICK = 3
 SHADES = ['#F17F71', '#FBF4CB', '#75B78C', '#8F5866']
 
 
@@ -73,6 +74,15 @@ def child_nodes(root_id, tree, max_depth=-1):
     visible_nodes += child_nodes(right_child, tree, max_depth-1)
 
     return visible_nodes
+
+def collapsed_leaves(tree, visible):
+    collapsed_leaf = []
+    for node_id in range(tree['node_count']):
+        if node_id in visible:
+            children = set(child_nodes(node_id, tree, -1)) - set([node_id])
+            if children.isdisjoint(set(visible)):
+                collapsed_leaf.append(node_id)
+    return collapsed_leaf
 
 def get_callbacks(app):
     @app.callback(Output('prepped-data', 'children'),
@@ -149,34 +159,29 @@ def get_callbacks(app):
                  [State('visible', 'children'),
                   State('collapsed_leaf', 'children')])
     def on_click(clicked_node_data, tree_json, visible, collapsed_leaf):
+        #need a tree to do anything
         if tree_json is None:
             return visible, collapsed_leaf
 
         tree = json.loads(tree_json)
-        if visible is None:
+        #on first load
+        if visible is None and collapsed_leaf is None:
             #default nodes
-            return child_nodes(0, tree, DEFAULT_MAX_DEPTH), collapsed_leaf
-        if collapsed_leaf is None:
-            collapsed_leaf = []
-            for node_id in range(tree['node_count']):
-                if node_id in visible:
-                    children = set(child_nodes(node_id, tree, -1)) - set([node_id])
-                    if children.isdisjoint(set(visible)):
-                        collapsed_leaf.append(node_id)
+            visible = child_nodes(0, tree, DEFAULT_MAX_DEPTH)
+            collapsed_leaf = collapsed_leaves(tree, visible)
             return visible, collapsed_leaf
-        if clicked_node_data is None:
-            return visible
 
-        print(clicked_node_data)
         clicked_node_id = int(clicked_node_data['id'])
         clicked_node_children = set(child_nodes(clicked_node_id, tree)) - set([clicked_node_id])
+        shallow_children = set(child_nodes(clicked_node_id, tree, max_depth=DEPTH_ON_CLICK)) - set([clicked_node_id])
+
 
         if clicked_node_id in visible and clicked_node_id not in collapsed_leaf: #TODO
-            #remove all children
+            #remove all children of a node that has been
             visible = list(set(visible) - clicked_node_children)
             collapsed_leaf.append(clicked_node_id)
         else:
-            visible = list(set(visible).union(clicked_node_children))
+            visible = list(set(visible).union(shallow_children))
             collapsed_leaf = list(set(collapsed_leaf) - set([clicked_node_id]))
         return visible, collapsed_leaf
 
@@ -270,7 +275,7 @@ def get_callbacks(app):
                     "content": "",
                     "width": 25,
                     "height": 25,
-                    "background-color": "#2f65bd",
+                    "background-color": "#818182",
                     "background-blacken": 0,
                     "background-opacity": 1,
                     "shape": "circle",
